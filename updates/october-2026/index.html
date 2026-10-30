@@ -64,6 +64,8 @@ button{font:inherit;color:inherit}
   visibility:hidden;opacity:0;transform:translateX(28px);
   transition:opacity .45s ease,transform .55s cubic-bezier(.2,.8,.2,1),visibility 0s linear .55s}
 .card::-webkit-scrollbar{display:none}
+.card > *{flex-shrink:0}
+.card > :not(.hero){zoom:var(--k,1)}
 .card.past{transform:translateX(-28px)}
 .card.active{visibility:visible;opacity:1;transform:none;
   transition:opacity .45s ease,transform .55s cubic-bezier(.2,.8,.2,1),visibility 0s}
@@ -485,6 +487,22 @@ h2{font-size:31px;line-height:1.02}
   }
 
   const onEnter = { 1: fillDots, 2: countUp };
+
+  // Shorter phones: shrink a stop's text just enough to fit the screen (never below 80%), so nothing hides below the bar
+  function fit(c) {
+    let k = 1;
+    c.style.setProperty('--k', k);
+    while (c.scrollHeight - c.clientHeight > 1 && k > 0.8) {
+      k = Math.round((k - 0.02) * 100) / 100;
+      c.style.setProperty('--k', k);
+    }
+  }
+  const fitAll = () => cards.forEach(fit);
+  fitAll();
+  if (document.fonts) document.fonts.ready.then(fitAll);
+  addEventListener('load', fitAll);
+  let resizeTimer = 0;
+  addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(fitAll, 120); });
 
   function go(i) {
     i = Math.max(0, Math.min(last, i));
